@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MAXC விற்பனை">
+<meta name="theme-color" content="#1a3a5c">
+<title>MAXC விற்பனை | Udayam Chemicals</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --primary-light: #2a5080;
+    --accent: #1D9E75;
+    --accent-light: #E1F5EE;
+    --accent-dark: #0F6E56;
+    --warning: #BA7517;
+    --warning-light: #FAEEDA;
+    --danger: #A32D2D;
+    --danger-light: #FCEBEB;
+    --blue: #378ADD;
+    --blue-light: #E6F1FB;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --text2: #5a6a7a;
+    --text3: #8a9aaa;
+    --border: rgba(0,0,0,0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, 'Noto Sans Tamil', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; position: relative; }
+  
+  /* HEADER */
+  .header { background: var(--primary); padding: 16px 16px 20px; position: sticky; top: 0; z-index: 100; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .logo-row { display: flex; align-items: center; gap: 10px; }
+  .logo-box { width: 36px; height: 36px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; letter-spacing: 0.5px; }
+  .logo-text { color: #fff; font-size: 15px; font-weight: 600; }
+  .logo-sub { color: #a8c4e0; font-size: 11px; }
+  .header-date { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #d0e8f8; }
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 14px; }
+  .stat-val { font-size: 22px; font-weight: 700; color: #fff; }
+  .stat-tamil { font-size: 12px; color: #a8c4e0; }
+  .stat-eng { font-size: 11px; color: rgba(255,255,255,0.5); }
+
+  /* TABS */
+  .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 120px; z-index: 90; }
+  .tab { flex: 1; padding: 12px 4px; text-align: center; font-size: 12px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+  .tab-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+  /* PAGES */
+  .page { display: none; padding: 16px; padding-bottom: 24px; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 12px; }
+  .card-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+  /* PRODUCT GRID */
+  .prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .prod-chip { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; background: var(--card); transition: all 0.15s; user-select: none; }
+  .prod-chip.sel { background: var(--blue-light); border-color: var(--blue); }
+  .prod-chip-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .prod-chip-eng { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* CONTROLS */
+  .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .ctrl-label { font-size: 13px; color: var(--text2); }
+  .ctrl-label small { font-size: 11px; color: var(--text3); display: block; }
+  .qty-ctrl { display: flex; align-items: center; gap: 10px; }
+  .qty-btn { width: 34px; height: 34px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); font-size: 18px; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; font-weight: 600; }
+  .qty-num { font-size: 18px; font-weight: 700; min-width: 30px; text-align: center; color: var(--text); }
+  .price-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .price-prefix { font-size: 20px; font-weight: 700; color: var(--text2); }
+  .price-inp { flex: 1; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 18px; font-weight: 600; background: var(--bg); color: var(--text); outline: none; }
+  .price-inp:focus { border-color: var(--blue); background: #fff; }
+  .unit-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .unit-btn { flex: 1; padding: 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--card); font-size: 12px; cursor: pointer; color: var(--text2); text-align: center; }
+  .unit-btn.sel { background: var(--blue-light); border-color: var(--blue); color: var(--primary); font-weight: 600; }
+
+  /* VOICE */
+  .voice-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 8px 0 4px; }
+  .voice-or { font-size: 12px; color: var(--text3); }
+  .voice-btn { width: 64px; height: 64px; border-radius: 50%; background: var(--primary); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s; box-shadow: 0 4px 14px rgba(26,58,92,0.3); }
+  .voice-btn.rec { background: var(--danger); animation: pulse 1s infinite; }
+  .voice-btn:active { transform: scale(0.94); }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(163,45,45,0.4)} 50%{box-shadow:0 0 0 10px rgba(163,45,45,0)} }
+  .voice-btn svg { width: 26px; height: 26px; fill: #fff; }
+  .voice-text { background: var(--bg); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--text2); width: 100%; min-height: 38px; border: 1px solid var(--border); line-height: 1.5; }
+
+  /* SAVE BTN */
+  .save-btn { width: 100%; padding: 15px; background: var(--accent); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 4px; letter-spacing: 0.3px; transition: opacity 0.15s, transform 0.1s; }
+  .save-btn:active { opacity: 0.87; transform: scale(0.98); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--accent); color: #fff; border-radius: 30px; padding: 10px 22px; font-size: 14px; font-weight: 600; z-index: 999; transition: transform 0.3s; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* LOG */
+  .log-item { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--border); }
+  .log-item:last-child { border-bottom: none; }
+  .log-icon { width: 36px; height: 36px; background: var(--accent-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 18px; flex-shrink: 0; }
+  .log-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .log-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .log-amt { font-size: 15px; font-weight: 700; color: var(--accent); }
+  .log-del { width: 28px; height: 28px; background: var(--danger-light); border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--danger); margin-left: 8px; }
+  .empty-state { text-align: center; padding: 30px 0; color: var(--text3); font-size: 14px; }
+
+  /* REPORT PAGE */
+  .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .rep-card { background: var(--card); border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 12px 14px; }
+  .rep-val { font-size: 20px; font-weight: 700; color: var(--text); }
+  .rep-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .rep-tamil { font-size: 12px; color: var(--text2); }
+  .prod-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .prod-bar-name { font-size: 12px; color: var(--text2); min-width: 90px; }
+  .prod-bar-track { flex: 1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+  .prod-bar-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.5s; }
+  .prod-bar-val { font-size: 12px; font-weight: 600; color: var(--text); min-width: 36px; text-align: right; }
+  .share-btn { width: 100%; padding: 13px; background: #25D366; border: none; border-radius: var(--radius-sm); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+  /* STOCK PAGE */
+  .stock-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .stock-item:last-child { border-bottom: none; }
+  .stock-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .stock-eng { font-size: 11px; color: var(--text3); }
+  .stock-right { text-align: right; }
+  .stock-qty { font-size: 16px; font-weight: 700; color: var(--text); }
+  .stock-unit { font-size: 11px; color: var(--text3); }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-ok { background: var(--accent-light); color: var(--accent-dark); }
+  .badge-low { background: var(--warning-light); color: var(--warning); }
+  .badge-out { background: var(--danger-light); color: var(--danger); }
+  .stock-inp { width: 70px; border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 8px; font-size: 14px; font-weight: 600; text-align: center; background: var(--bg); color: var(--text); }
+
+  /* SETTINGS PAGE */
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 14px; color: var(--text); }
+  .setting-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .setting-inp { border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 13px; background: var(--bg); color: var(--text); width: 130px; }
+
+  /* BOTTOM NAV */
+  .bottom-nav { display: flex; background: var(--card); border-top: 1px solid var(--border); position: sticky; bottom: 0; z-index: 100; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 0 8px; cursor: pointer; gap: 3px; transition: opacity 0.15s; }
+  .nav-item svg { width: 22px; height: 22px; stroke: var(--text3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-item.active svg { stroke: var(--primary); }
+  .nav-item span { font-size: 10px; color: var(--text3); }
+  .nav-item.active span { color: var(--primary); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo-row">
+      <div class="logo-box">MX</div>
+      <div>
+        <div class="logo-text">MAXC விற்பனை</div>
+        <div class="logo-sub">உதயம் கெமிக்கல்ஸ்</div>
+      </div>
+    </div>
+    <div class="header-date" id="hdr-date"></div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-val" id="hdr-total">₹0</div>
+      <div class="stat-tamil">இன்று விற்பனை</div>
+      <div class="stat-eng">Today's Revenue</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="hdr-count">0</div>
+      <div class="stat-tamil">பொருட்கள் விற்பனை</div>
+      <div class="stat-eng">Items Sold</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showPage('entry',this)">
+    <span class="tab-icon">➕</span>
+    <span>விற்பனை</span>
+  </div>
+  <div class="tab" onclick="showPage('report',this)">
+    <span class="tab-icon">📊</span>
+    <span>அறிக்கை</span>
+  </div>
+  <div class="tab" onclick="showPage('stock',this)">
+    <span class="tab-icon">📦</span>
+    <span>கையிருப்பு</span>
+  </div>
+  <div class="tab" onclick="showPage('settings',this)">
+    <span class="tab-icon">⚙️</span>
+    <span>அமைப்பு</span>
+  </div>
+</div>
+
+<!-- ENTRY PAGE -->
+<div class="page active" id="page-entry">
+  <div class="card">
+    <div class="card-title">பொருள் தேர்வு செய்யுங்கள் / Select Product</div>
+    <div class="prod-grid" id="prod-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">அளவு & விலை / Quantity & Price</div>
+    <div class="control-row">
+      <div class="ctrl-label">
+        அளவு
+        <small>Quantity</small>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <span class="qty-num" id="qty-disp">1</span>
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+    </div>
+    <div class="unit-row" id="unit-row">
+      <button class="unit-btn sel" onclick="selectUnit(this,'லிட்டர்','L')">லிட்டர் (L)</button>
+      <button class="unit-btn" onclick="selectUnit(this,'கிலோ','kg')">கிலோ (kg)</button>
+      <button class="unit-btn" onclick="selectUnit(this,'எண்ணிக்கை','nos')">எண்ணிக்கை (nos)</button>
+    </div>
+    <div class="price-row">
+      <span class="price-prefix">₹</span>
+      <input class="price-inp" type="number" id="price-inp" placeholder="விலை / Price" inputmode="numeric">
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;text-align:right;">
+      மொத்தம் / Total: <strong id="live-total">₹0</strong>
+    </div>
+    <button class="save-btn" onclick="addSale()">✅ சேமி / Save Entry</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">குரல் உள்ளீடு / Voice Entry (Tamil)</div>
+    <div class="voice-wrap">
+      <div class="voice-or">அல்லது குரலில் சொல்லுங்கள் / Or speak in Tamil</div>
+      <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">
+        <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
+      </button>
+      <div class="voice-text" id="voice-text">🎙 பொத்தானை அழுத்தி பேசுங்கள்...<br><small>Eg: "டிட்டர்ஜென்ட் 5 லிட்டர் 200 ரூபாய்"</small></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">இன்றைய பதிவுகள் / Today's Log</div>
+    <div id="sale-log"><div class="empty-state">பதிவுகள் இல்லை<br><small>No entries yet</small></div></div>
+  </div>
+</div>
+
+<!-- REPORT PAGE -->
+<div class="page" id="page-report">
+  <div class="card">
+    <div class="card-title">இன்றைய சுருக்கம் / Today's Summary</div>
+    <div class="report-grid">
+      <div class="rep-card">
+        <div class="rep-val" id="rep-revenue">₹0</div>
+        <div class="rep-tamil">மொத்த வருவாய்</div>
+        <div class="rep-label">Total Revenue</div>
+      </div>
+      <div class="rep-card">
+        <div class="rep-val" id="rep-txn">0</div>
+        <div class="rep-tamil">விற்பனை எண்ணிக்கை</div>
+        <div class="rep-label">Transactions</div>
+      </div>
+      <div class="rep-card">
+        <div class="rep-val" id="rep-avg">₹0</div>
+        <div class="rep-tamil">சராசரி விற்பனை</div>
+        <div class="rep-label">Avg Sale Value</div>
+      </div>
+      <div class="rep-card">
+        <div class="rep-val" id="rep-top">—</div>
+        <div class="rep-tamil">அதிக விற்பனை</div>
+        <div class="rep-label">Top Product</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">பொருள் வாரியான விற்பனை / Sales by Product</div>
+    <div id="prod-bars"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">அனைத்து பதிவுகளும் / All Entries</div>
+    <div id="report-log"></div>
+  </div>
+  <button class="share-btn" onclick="shareReport()">
+    📤 WhatsApp-ல் அனுப்பு / Share via WhatsApp
+  </button>
+</div>
+
+<!-- STOCK PAGE -->
+<div class="page" id="page-stock">
+  <div class="card">
+    <div class="card-title">கையிருப்பு நிலை / Stock Status</div>
+    <div id="stock-list"></div>
+  </div>
+  <button class="save-btn" onclick="saveStock()" style="margin-top:0;">💾 கையிருப்பு சேமி / Save Stock</button>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+  <div class="card">
+    <div class="card-title">அமைப்புகள் / Settings</div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">கடை பெயர்</div>
+        <div class="setting-sub">Shop Name</div>
+      </div>
+      <input class="setting-inp" id="set-shop" value="உதயம் கெமிக்கல்ஸ்">
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">உரிமையாளர் பெயர்</div>
+        <div class="setting-sub">Owner Name</div>
+      </div>
+      <input class="setting-inp" id="set-owner" value="அப்பா">
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">WhatsApp எண்</div>
+        <div class="setting-sub">Your number for reports</div>
+      </div>
+      <input class="setting-inp" id="set-phone" placeholder="9XXXXXXXXX" type="tel">
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">குறைந்தபட்ச கையிருப்பு</div>
+        <div class="setting-sub">Min stock alert (litres)</div>
+      </div>
+      <input class="setting-inp" id="set-minstock" value="20" type="number">
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">தரவு / Data</div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">இன்றைய பதிவுகளை அழி</div>
+        <div class="setting-sub">Clear today's entries</div>
+      </div>
+      <button onclick="clearToday()" style="padding:7px 14px;border:1.5px solid var(--danger);border-radius:6px;background:var(--danger-light);color:var(--danger);font-size:12px;font-weight:600;cursor:pointer;">அழி / Clear</button>
+    </div>
+  </div>
+  <div style="text-align:center;padding:16px 0;font-size:12px;color:var(--text3);">
+    MAXC உதயம் கெமிக்கல்ஸ் v1.0<br>
+    <span style="font-size:11px;">Data saved on this device</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PRODUCTS = [
+  { id:"det", name:"டிட்டர்ஜென்ட்", eng:"Detergent Liquid", icon:"🧴", minStock:30 },
+  { id:"flr", name:"ஃப்ளோர் கிளீனர்", eng:"Floor Cleaner", icon:"🧹", minStock:25 },
+  { id:"tlt", name:"டாய்லட் கிளீனர்", eng:"Toilet Cleaner", icon:"🚽", minStock:20 },
+  { id:"dsh", name:"டிஷ்வாஷ்", eng:"Dishwash", icon:"🍽️", minStock:25 },
+  { id:"sop", name:"சோப் ஆயில்", eng:"Soap Oil", icon:"🛢️", minStock:20 },
+  { id:"brm", name:"பிரும் ஸ்டிக்", eng:"Broom Stick", icon:"🧺", minStock:10 },
+  { id:"mop", name:"மாப்", eng:"Mop", icon:"🪣", minStock:5 },
+  { id:"oth", name:"மற்றவை", eng:"Other", icon:"📦", minStock:0 },
+];
+
+let selectedProd = null;
+let selectedUnit = 'L';
+let qty = 1;
+let recognizing = false;
+let recognition = null;
+
+function loadData(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; }
+}
+function saveData(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+const todayKey = () => 'sales_' + new Date().toISOString().slice(0,10);
+let sales = loadData(todayKey(), []);
+let stock = loadData('stock', { det:100, flr:60, tlt:80, dsh:70, sop:50, brm:20, mop:10, oth:0 });
+
+function buildProdGrid() {
+  const grid = document.getElementById('prod-grid');
+  grid.innerHTML = '';
+  PRODUCTS.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'prod-chip';
+    d.id = 'chip-' + p.id;
+    d.innerHTML = `<div style="font-size:20px;margin-bottom:3px;">${p.icon}</div><div class="prod-chip-name">${p.name}</div><div class="prod-chip-eng">${p.eng}</div>`;
+    d.onclick = () => {
+      selectedProd = p.id;
+      document.querySelectorAll('.prod-chip').forEach(c => c.classList.remove('sel'));
+      d.classList.add('sel');
+      updateLiveTotal();
+    };
+    grid.appendChild(d);
+  });
+}
+
+function selectUnit(btn, tamil, code) {
+  selectedUnit = code;
+  document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function changeQty(d) {
+  qty = Math.max(1, qty + d);
+  document.getElementById('qty-disp').textContent = qty;
+  updateLiveTotal();
+}
+
+function updateLiveTotal() {
+  const price = parseFloat(document.getElementById('price-inp').value) || 0;
+  document.getElementById('live-total').textContent = '₹' + Math.round(qty * price);
+}
+document.getElementById('price-inp').addEventListener('input', updateLiveTotal);
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function addSale() {
+  if (!selectedProd) { showToast('⚠️ பொருள் தேர்வு செய்யவும்!'); return; }
+  const price = parseFloat(document.getElementById('price-inp').value);
+  if (!price || price <= 0) { showToast('⚠️ விலை உள்ளிடவும்!'); return; }
+  const prod = PRODUCTS.find(p => p.id === selectedProd);
+  const now = new Date();
+  const time = now.toLocaleTimeString('ta-IN', { hour:'2-digit', minute:'2-digit' });
+  const entry = { id: Date.now(), prod: prod.id, name: prod.name, eng: prod.eng, icon: prod.icon, qty, unit: selectedUnit, price: Math.round(price), total: Math.round(qty * price), time };
+  sales.push(entry);
+  saveData(todayKey(), sales);
+  if (stock[prod.id] !== undefined) {
+    stock[prod.id] = Math.max(0, (stock[prod.id] || 0) - qty);
+    saveData('stock', stock);
+  }
+  renderAll();
+  document.getElementById('price-inp').value = '';
+  qty = 1; document.getElementById('qty-disp').textContent = '1';
+  document.getElementById('live-total').textContent = '₹0';
+  selectedProd = null;
+  document.querySelectorAll('.prod-chip').forEach(c => c.classList.remove('sel'));
+  showToast('✅ சேமிக்கப்பட்டது! Saved!');
+}
+
+function deleteSale(id) {
+  sales = sales.filter(s => s.id !== id);
+  saveData(todayKey(), sales);
+  renderAll();
+}
+
+function renderHeader() {
+  const total = sales.reduce((a, s) => a + s.total, 0);
+  const count = sales.reduce((a, s) => a + s.qty, 0);
+  document.getElementById('hdr-total').textContent = '₹' + total.toLocaleString('en-IN');
+  document.getElementById('hdr-count').textContent = count;
+  const now = new Date();
+  document.getElementById('hdr-date').textContent = now.toLocaleDateString('ta-IN', { weekday:'short', day:'numeric', month:'short' });
+}
+
+function renderLog() {
+  const log = document.getElementById('sale-log');
+  if (!sales.length) { log.innerHTML = '<div class="empty-state">பதிவுகள் இல்லை<br><small>No entries yet</small></div>'; return; }
+  log.innerHTML = sales.slice().reverse().map(s => `
+    <div class="log-item">
+      <div style="display:flex;align-items:center;">
+        <div class="log-icon">${s.icon}</div>
+        <div>
+          <div class="log-name">${s.name}</div>
+          <div class="log-meta">${s.qty}${s.unit} × ₹${s.price} · ${s.time}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="log-amt">₹${s.total}</div>
+        <button class="log-del" onclick="deleteSale(${s.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderReport() {
+  const total = sales.reduce((a, s) => a + s.total, 0);
+  const txn = sales.length;
+  const avg = txn ? Math.round(total / txn) : 0;
+  document.getElementById('rep-revenue').textContent = '₹' + total.toLocaleString('en-IN');
+  document.getElementById('rep-txn').textContent = txn;
+  document.getElementById('rep-avg').textContent = '₹' + avg;
+  const byProd = {};
+  sales.forEach(s => { byProd[s.prod] = (byProd[s.prod] || 0) + s.total; });
+  const sorted = Object.entries(byProd).sort((a,b) => b[1]-a[1]);
+  if (sorted.length) {
+    const topProd = PRODUCTS.find(p => p.id === sorted[0][0]);
+    document.getElementById('rep-top').textContent = topProd ? topProd.name : '—';
+  }
+  const maxVal = sorted[0] ? sorted[0][1] : 1;
+  document.getElementById('prod-bars').innerHTML = sorted.length ? sorted.map(([id, val]) => {
+    const p = PRODUCTS.find(pr => pr.id === id);
+    return `<div class="prod-bar-row">
+      <div class="prod-bar-name">${p ? p.name : id}</div>
+      <div class="prod-bar-track"><div class="prod-bar-fill" style="width:${Math.round(val/maxVal*100)}%"></div></div>
+      <div class="prod-bar-val">₹${val}</div>
+    </div>`;
+  }).join('') : '<div class="empty-state">பதிவுகள் இல்லை</div>';
+  const rlog = document.getElementById('report-log');
+  rlog.innerHTML = sales.length ? sales.slice().reverse().map(s => `
+    <div class="log-item">
+      <div style="display:flex;align-items:center;">
+        <div class="log-icon">${s.icon}</div>
+        <div><div class="log-name">${s.name}</div><div class="log-meta">${s.qty}${s.unit} × ₹${s.price} · ${s.time}</div></div>
+      </div>
+      <div class="log-amt">₹${s.total}</div>
+    </div>`).join('') : '<div class="empty-state">பதிவுகள் இல்லை</div>';
+}
+
+function renderStock() {
+  const list = document.getElementById('stock-list');
+  list.innerHTML = PRODUCTS.filter(p => p.id !== 'oth').map(p => {
+    const qty = stock[p.id] || 0;
+    const min = p.minStock;
+    let badge, badgeClass;
+    if (qty <= 0) { badge = 'தீர்ந்துவிட்டது / Out'; badgeClass = 'badge-out'; }
+    else if (qty < min) { badge = 'குறைவு / Low'; badgeClass = 'badge-low'; }
+    else { badge = 'நல்லது / OK'; badgeClass = 'badge-ok'; }
+    return `<div class="stock-item">
+      <div>
+        <div class="stock-name">${p.icon} ${p.name}</div>
+        <div class="stock-eng">${p.eng}</div>
+        <span class="badge ${badgeClass}">${badge}</span>
+      </div>
+      <div class="stock-right">
+        <input class="stock-inp" type="number" value="${qty}" onchange="updateStock('${p.id}',this.value)" inputmode="numeric">
+        <div class="stock-unit">லிட்டர் / L</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStock(id, val) { stock[id] = Math.max(0, parseInt(val) || 0); }
+function saveStock() { saveData('stock', stock); showToast('✅ கையிருப்பு சேமிக்கப்பட்டது!'); }
+
+function renderAll() { renderHeader(); renderLog(); renderReport(); renderStock(); }
+
+function showPage(id, tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  tab.classList.add('active');
+}
+
+function shareReport() {
+  const total = sales.reduce((a, s) => a + s.total, 0);
+  const shopName = document.getElementById('set-shop').value || 'உதயம் கெமிக்கல்ஸ்';
+  const owner = document.getElementById('set-owner').value || 'அப்பா';
+  const phone = document.getElementById('set-phone').value;
+  const today = new Date().toLocaleDateString('ta-IN', { day:'numeric', month:'long', year:'numeric' });
+  let msg = `🏪 *${shopName} - MAXC*\n📅 தேதி: ${today}\n\n`;
+  msg += `💰 *மொத்த விற்பனை: ₹${total.toLocaleString('en-IN')}*\n`;
+  msg += `📋 பதிவுகள்: ${sales.length}\n\n`;
+  msg += `*விற்பனை பட்டியல்:*\n`;
+  sales.forEach(s => { msg += `• ${s.name}: ${s.qty}${s.unit} × ₹${s.price} = ₹${s.total}\n`; });
+  msg += `\n_MAXC உதயம் கெமிக்கல்ஸ் விற்பனை அறிக்கை_`;
+  const encoded = encodeURIComponent(msg);
+  const url = phone ? `https://wa.me/91${phone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+  window.open(url, '_blank');
+}
+
+function clearToday() {
+  if (confirm('இன்றைய அனைத்து பதிவுகளையும் அழிக்கவா? / Clear all today\'s entries?')) {
+    sales = [];
+    saveData(todayKey(), sales);
+    renderAll();
+    showToast('அழிக்கப்பட்டது / Cleared');
+  }
+}
+
+function toggleVoice() {
+  const btn = document.getElementById('voice-btn');
+  const tx = document.getElementById('voice-text');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { tx.innerHTML = '⚠️ Chrome browser-ல் திறக்கவும் / Open in Chrome for voice support'; return; }
+  if (recognizing) { recognition.stop(); return; }
+  recognition = new SR();
+  recognition.lang = 'ta-IN';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.onstart = () => { recognizing = true; btn.classList.add('rec'); tx.textContent = '🔴 கேட்கிறது... பேசுங்கள் / Listening... Speak now'; };
+  recognition.onresult = e => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+    tx.textContent = '🎙 ' + transcript;
+  };
+  recognition.onend = () => { recognizing = false; btn.classList.remove('rec'); };
+  recognition.onerror = () => { recognizing = false; btn.classList.remove('rec'); tx.textContent = '⚠️ மீண்டும் முயற்சிக்கவும் / Try again'; };
+  recognition.start();
+}
+
+buildProdGrid();
+renderAll();
+</script>
+</body>
+</html>
