@@ -237,13 +237,49 @@
   </div>
 
   <div class="card">
-    <div class="card-title">குரல் உள்ளீடு / Voice Entry (Tamil)</div>
+    <div class="card-title">🎙 குரல் விற்பனை பதிவு / Smart Voice Entry</div>
     <div class="voice-wrap">
-      <div class="voice-or">அல்லது குரலில் சொல்லுங்கள் / Or speak in Tamil</div>
+      <div class="voice-or">பொத்தானை அழுத்தி தமிழில் பேசுங்கள்</div>
+      <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:4px;">
+        எ.கா: <strong>"2 broom 80 rupees"</strong> அல்லது <strong>"டிட்டர்ஜென்ட் 5 லிட்டர் 200"</strong>
+      </div>
       <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">
         <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
       </button>
-      <div class="voice-text" id="voice-text">🎙 பொத்தானை அழுத்தி பேசுங்கள்...<br><small>Eg: "டிட்டர்ஜென்ட் 5 லிட்டர் 200 ரூபாய்"</small></div>
+      <div class="voice-text" id="voice-text">🎙 பொத்தானை அழுத்தி பேசுங்கள்...<br><small>Eg: "2 broom 80 rupees" or "detergent 5 litre 200"</small></div>
+    </div>
+
+    <!-- VOICE PREVIEW CARD — shown after speech parsed -->
+    <div id="voice-preview" style="display:none;margin-top:12px;background:var(--accent-light);border:1.5px solid var(--accent);border-radius:var(--radius-sm);padding:14px;">
+      <div style="font-size:12px;font-weight:700;color:var(--accent-dark);margin-bottom:10px;">✅ இதை சேமிக்கவா? / Confirm & Save?</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div id="vp-icon" style="font-size:28px;"></div>
+        <div>
+          <div id="vp-name" style="font-size:15px;font-weight:700;color:var(--text);"></div>
+          <div id="vp-meta" style="font-size:13px;color:var(--text2);margin-top:2px;"></div>
+        </div>
+        <div id="vp-total" style="font-size:18px;font-weight:700;color:var(--accent);margin-left:auto;"></div>
+      </div>
+      <!-- editable fields in preview -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px;">அளவு / Qty</div>
+          <input id="vp-qty-inp" type="number" inputmode="numeric" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:700;background:#fff;color:var(--text);" oninput="recalcVoiceTotal()">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px;">விலை / Price ₹</div>
+          <input id="vp-price-inp" type="number" inputmode="numeric" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:700;background:#fff;color:var(--text);" oninput="recalcVoiceTotal()">
+        </div>
+      </div>
+      <!-- new product name if unknown -->
+      <div id="vp-newprod-row" style="display:none;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--warning);margin-bottom:3px;">⚠️ புதிய பொருள் / New product name</div>
+        <input id="vp-newprod-inp" type="text" placeholder="பொருள் பெயர் தட்டச்சு செய்யவும்" style="width:100%;border:1.5px solid var(--warning);border-radius:6px;padding:7px 10px;font-size:14px;background:#fff;color:var(--text);">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="confirmVoiceSave()" style="flex:2;padding:11px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">✅ சேமி / Save</button>
+        <button onclick="cancelVoice()" style="flex:1;padding:11px;background:var(--danger-light);border:1.5px solid var(--danger);border-radius:var(--radius-sm);color:var(--danger);font-size:14px;font-weight:700;cursor:pointer;">✕ ரத்து</button>
+      </div>
     </div>
   </div>
 
@@ -577,23 +613,204 @@ function clearToday() {
   }
 }
 
+// ── SMART VOICE PARSE ENGINE ──────────────────────────────────────────
+// Maps spoken words (Tamil + English + mixed) → product IDs
+const VOICE_MAP = {
+  det: ['detergent','டிட்டர்ஜென்ட்','டிட்டர்ஜன்ட்','deterjent','deter'],
+  flr: ['floor','ஃப்ளோர்','floor cleaner','ஃப்ளோர் கிளீனர்','floar'],
+  tlt: ['toilet','டாய்லட்','toilet cleaner','டாய்லட் கிளீனர்','toillet'],
+  dsh: ['dishwash','டிஷ்வாஷ்','dish','dish wash','dishwas'],
+  sop: ['soap','சோப்','soap oil','சோப் ஆயில்','soapoil'],
+  brm: ['broom','பிரும்','broomstick','broom stick','பிரும் ஸ்டிக்','jhadu','jadu'],
+  mop: ['mop','மாப்','mopp'],
+};
+
+// Number words in Tamil + English
+const NUM_WORDS = {
+  'ஒன்று':1,'ஒரு':1,'one':1,'ஒண்ணு':1,
+  'இரண்டு':2,'இரண்':2,'two':2,'ரெண்டு':2,
+  'மூன்று':3,'three':3,'மூணு':3,
+  'நான்கு':4,'four':4,'நாலு':4,
+  'ஐந்து':5,'five':5,'ஐஞ்சு':5,
+  'ஆறு':6,'six':6,
+  'ஏழு':7,'seven':7,
+  'எட்டு':8,'eight':8,
+  'ஒன்பது':9,'nine':9,
+  'பத்து':10,'ten':10,
+};
+
+let voiceParsed = null; // holds parsed result before confirm
+
+function parseVoiceText(text) {
+  const lower = text.toLowerCase().trim();
+
+  // 1. Find product
+  let foundProd = null;
+  for (const [id, keywords] of Object.entries(VOICE_MAP)) {
+    if (keywords.some(k => lower.includes(k.toLowerCase()))) {
+      foundProd = PRODUCTS.find(p => p.id === id);
+      break;
+    }
+  }
+
+  // 2. Extract all numbers (digits)
+  const nums = [...lower.matchAll(/\d+(\.\d+)?/g)].map(m => parseFloat(m[0]));
+
+  // 3. Extract number words
+  let wordNums = [];
+  for (const [word, val] of Object.entries(NUM_WORDS)) {
+    if (lower.includes(word.toLowerCase())) wordNums.push(val);
+  }
+  const allNums = [...wordNums, ...nums];
+
+  // 4. Detect unit
+  let unit = 'nos';
+  if (/லிட்டர்|litre|liter|ltr|l\b/.test(lower)) unit = 'L';
+  else if (/கிலோ|kilo|kg/.test(lower)) unit = 'kg';
+
+  // 5. Figure qty vs price
+  // Heuristic: smaller number = qty (unless only 1 number)
+  let qty = 1, price = 0;
+  if (allNums.length === 1) {
+    // Only price spoken, qty = 1
+    price = allNums[0];
+    qty = 1;
+  } else if (allNums.length >= 2) {
+    // Sort: smallest likely qty, largest likely price
+    const sorted = [...allNums].sort((a,b)=>a-b);
+    qty = sorted[0];
+    price = sorted[sorted.length-1];
+  }
+
+  // 6. Check for rupee word to confirm price
+  if (/ரூபாய்|rupee|rs|₹/.test(lower)) {
+    // price confirmed — re-extract the number before rupee/rs
+    const rsMatch = lower.match(/(\d+)\s*(ரூபாய்|rupees?|rs)/);
+    if (rsMatch) price = parseFloat(rsMatch[1]);
+  }
+
+  return { prod: foundProd, qty: Math.max(1, Math.round(qty)), price: Math.round(price), unit, raw: text, isNew: !foundProd };
+}
+
+function showVoicePreview(parsed) {
+  voiceParsed = parsed;
+  const preview = document.getElementById('voice-preview');
+  const prod = parsed.prod;
+
+  document.getElementById('vp-icon').textContent = prod ? prod.icon : '📦';
+  document.getElementById('vp-name').textContent = prod ? prod.name + ' / ' + prod.eng : '❓ புதிய பொருள் / New Product';
+  document.getElementById('vp-qty-inp').value = parsed.qty;
+  document.getElementById('vp-price-inp').value = parsed.price;
+  document.getElementById('vp-meta').textContent = parsed.qty + (parsed.unit) + ' × ₹' + parsed.price;
+  document.getElementById('vp-total').textContent = '₹' + Math.round(parsed.qty * parsed.price);
+
+  // Show new product input if unknown
+  const newRow = document.getElementById('vp-newprod-row');
+  newRow.style.display = parsed.isNew ? 'block' : 'none';
+  if (parsed.isNew) document.getElementById('vp-newprod-inp').value = parsed.raw;
+
+  preview.style.display = 'block';
+  preview.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function recalcVoiceTotal() {
+  const q = parseFloat(document.getElementById('vp-qty-inp').value) || 0;
+  const p = parseFloat(document.getElementById('vp-price-inp').value) || 0;
+  document.getElementById('vp-total').textContent = '₹' + Math.round(q * p);
+  document.getElementById('vp-meta').textContent = q + (voiceParsed ? voiceParsed.unit : '') + ' × ₹' + p;
+}
+
+function confirmVoiceSave() {
+  if (!voiceParsed) return;
+  const qty = parseFloat(document.getElementById('vp-qty-inp').value) || 1;
+  const price = parseFloat(document.getElementById('vp-price-inp').value) || 0;
+  if (!price) { showToast('⚠️ விலை உள்ளிடவும் / Enter price'); return; }
+
+  let prod = voiceParsed.prod;
+  let prodName, prodEng, prodIcon, prodId;
+
+  if (prod) {
+    prodName = prod.name; prodEng = prod.eng; prodIcon = prod.icon; prodId = prod.id;
+  } else {
+    // New custom product from voice
+    const customName = document.getElementById('vp-newprod-inp').value.trim() || 'மற்றவை';
+    prodName = customName; prodEng = customName; prodIcon = '📦'; prodId = 'custom_' + Date.now();
+  }
+
+  const now = new Date();
+  const time = now.toLocaleTimeString('ta-IN', { hour:'2-digit', minute:'2-digit' });
+  const entry = { id: Date.now(), prod: prodId, name: prodName, eng: prodEng, icon: prodIcon, qty, unit: voiceParsed.unit, price: Math.round(price), total: Math.round(qty * price), time };
+  sales.push(entry);
+  saveData(todayKey(), sales);
+  if (stock[prodId] !== undefined) {
+    stock[prodId] = Math.max(0, (stock[prodId] || 0) - qty);
+    saveData('stock', stock);
+  }
+  renderAll();
+  cancelVoice();
+  showToast('✅ குரல் பதிவு சேமிக்கப்பட்டது! Voice entry saved!');
+}
+
+function cancelVoice() {
+  document.getElementById('voice-preview').style.display = 'none';
+  document.getElementById('voice-text').innerHTML = '🎙 பொத்தானை அழுத்தி பேசுங்கள்...<br><small>Eg: "2 broom 80 rupees" or "detergent 5 litre 200"</small>';
+  voiceParsed = null;
+}
+
 function toggleVoice() {
   const btn = document.getElementById('voice-btn');
   const tx = document.getElementById('voice-text');
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { tx.innerHTML = '⚠️ Chrome browser-ல் திறக்கவும் / Open in Chrome for voice support'; return; }
   if (recognizing) { recognition.stop(); return; }
+
+  // Hide old preview
+  cancelVoice();
+
   recognition = new SR();
   recognition.lang = 'ta-IN';
   recognition.continuous = false;
   recognition.interimResults = true;
-  recognition.onstart = () => { recognizing = true; btn.classList.add('rec'); tx.textContent = '🔴 கேட்கிறது... பேசுங்கள் / Listening... Speak now'; };
-  recognition.onresult = e => {
-    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
-    tx.textContent = '🎙 ' + transcript;
+
+  recognition.onstart = () => {
+    recognizing = true;
+    btn.classList.add('rec');
+    tx.textContent = '🔴 கேட்கிறது... பேசுங்கள்! / Listening... Speak now!';
   };
-  recognition.onend = () => { recognizing = false; btn.classList.remove('rec'); };
-  recognition.onerror = () => { recognizing = false; btn.classList.remove('rec'); tx.textContent = '⚠️ மீண்டும் முயற்சிக்கவும் / Try again'; };
+
+  let finalTranscript = '';
+  recognition.onresult = e => {
+    let interim = '';
+    finalTranscript = '';
+    for (let r of e.results) {
+      if (r.isFinal) finalTranscript += r[0].transcript;
+      else interim += r[0].transcript;
+    }
+    tx.textContent = '🎙 ' + (finalTranscript || interim);
+  };
+
+  recognition.onend = () => {
+    recognizing = false;
+    btn.classList.remove('rec');
+    const spoken = finalTranscript.trim();
+    if (spoken) {
+      const parsed = parseVoiceText(spoken);
+      tx.textContent = '✔ "' + spoken + '"';
+      showVoicePreview(parsed);
+    } else {
+      tx.innerHTML = '🎙 பொத்தானை அழுத்தி பேசுங்கள்...<br><small>Nothing heard. Try again.</small>';
+    }
+  };
+
+  recognition.onerror = (e) => {
+    recognizing = false;
+    btn.classList.remove('rec');
+    if (e.error === 'not-allowed') {
+      tx.innerHTML = '⚠️ Microphone blocked! Chrome Settings → Site Settings → Mic → Allow';
+    } else {
+      tx.innerHTML = '⚠️ மீண்டும் முயற்சிக்கவும் / Try again (' + e.error + ')';
+    }
+  };
   recognition.start();
 }
 
